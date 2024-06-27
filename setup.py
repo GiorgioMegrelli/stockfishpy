@@ -1,21 +1,27 @@
 import codecs
 import os
 import sys
-
 from distutils.util import convert_path
 from fnmatch import fnmatchcase
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 
-def read(fname):
-    return codecs.open(os.path.join(os.path.dirname(__file__), fname)).read()
+def read(f_name):
+    return codecs.open(os.path.join(os.path.dirname(__file__), f_name)).read()
 
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
-standard_exclude = ["*.py", "*.pyc", "*$py.class", "*~", ".*", "*.bak"]
-standard_exclude_directories = [
-    ".*", "CVS", "_darcs", "./build", "./dist", "EGG-INFO", "*.egg-info"
+STANDARD_EXCLUDE = ["*.py", "*.pyc", "*$py.class", "*~", ".*", "*.bak"]
+STANDARD_EXCLUDE_DIRECTORIES = [
+    ".*",
+    "CVS",
+    "_darcs",
+    "./build",
+    "./dist",
+    "EGG-INFO",
+    "*.egg-info",
 ]
 
 
@@ -27,10 +33,11 @@ standard_exclude_directories = [
 def find_package_data(
     where=".",
     package="",
-    exclude=standard_exclude,
-    exclude_directories=standard_exclude_directories,
+    exclude=None,
+    exclude_directories=None,
     only_in_packages=True,
-    show_ignored=False):
+    show_ignored=False,
+):
     """
     Return a dictionary suitable for use in ``package_data``
     in a distutils ``setup.py`` file.
@@ -50,6 +57,11 @@ def find_package_data(
     Note patterns use wildcards, or can be exact paths (including
     leading ``./``), and all searching is case-insensitive.
     """
+    if exclude_directories is None:
+        exclude_directories = STANDARD_EXCLUDE_DIRECTORIES
+    if exclude is None:
+        exclude = STANDARD_EXCLUDE
+
     out = {}
     stack = [(convert_path(where), "", package, only_in_packages)]
     while stack:
@@ -59,18 +71,19 @@ def find_package_data(
             if os.path.isdir(fn):
                 bad_name = False
                 for pattern in exclude_directories:
-                    if (fnmatchcase(name, pattern)
-                        or fn.lower() == pattern.lower()):
+                    if fnmatchcase(name, pattern) or fn.lower() == pattern.lower():
                         bad_name = True
                         if show_ignored:
-                            print >> sys.stderr, (
-                                "Directory %s ignored by pattern %s"
-                                % (fn, pattern))
+                            print(
+                                "Directory {} ignored by pattern {}".format(
+                                    fn, pattern
+                                ),
+                                file=sys.stderr,
+                            )
                         break
                 if bad_name:
                     continue
-                if (os.path.isfile(os.path.join(fn, "__init__.py"))
-                    and not prefix):
+                if os.path.isfile(os.path.join(fn, "__init__.py")) and not prefix:
                     if not package:
                         new_package = name
                     else:
@@ -82,17 +95,17 @@ def find_package_data(
                 # is a file
                 bad_name = False
                 for pattern in exclude:
-                    if (fnmatchcase(name, pattern)
-                        or fn.lower() == pattern.lower()):
+                    if fnmatchcase(name, pattern) or fn.lower() == pattern.lower():
                         bad_name = True
                         if show_ignored:
-                            print >> sys.stderr, (
-                                "File %s ignored by pattern %s"
-                                % (fn, pattern))
+                            print(
+                                "File {} ignored by pattern {}".format(fn, pattern),
+                                file=sys.stderr,
+                            )
                         break
                 if bad_name:
                     continue
-                out.setdefault(package, []).append(prefix+name)
+                out.setdefault(package, []).append(prefix + name)
     return out
 
 
@@ -109,7 +122,7 @@ setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
-    long_description=read("README.rst"),
+    long_description=read("README.md"),
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     license="GPLv3",
@@ -123,5 +136,5 @@ setup(
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    zip_safe=False,)
-
+    zip_safe=False,
+)
