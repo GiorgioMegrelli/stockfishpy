@@ -6,4 +6,5 @@
 /media/
 .env
 /dist/
+/build/
 /stockfishpy.egg-info/

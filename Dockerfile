@@ -17,7 +17,10 @@ RUN apt-get install -y wget
 RUN apt-get install -y python3 python3-pip
 
 COPY requirements.txt .
-RUN python3 -m pip install -r requirements.txt
+COPY dev-requirements.txt .
+RUN python3 -m pip install \
+    -r requirements.txt \
+    -r dev-requirements.txt
 
 # Download Stockfish
 RUN wget $STOCKFISH_URL -O $STOCKFISH_ARCHIVE && \
